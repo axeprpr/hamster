@@ -88,7 +88,7 @@ export function RegisterForm() {
           minLength={8}
         />
       </div>
-      <Button className="w-full" disabled={loading}>
+      <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Creating account..." : "Create account"}
       </Button>
     </form>
