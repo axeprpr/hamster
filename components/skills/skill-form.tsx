@@ -7,7 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CredentialPicker } from "./credential-picker";
+import { SKILL_PRESETS } from "@/lib/skill-presets";
+import { useLocale } from "@/lib/i18n/context";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
   ssr: false,
@@ -31,6 +40,7 @@ interface SkillFormProps {
 
 export function SkillForm({ initialData }: SkillFormProps) {
   const router = useRouter();
+  const { t } = useLocale();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [template, setTemplate] = useState(
@@ -42,18 +52,33 @@ export function SkillForm({ initialData }: SkillFormProps) {
   const [isPublished, setIsPublished] = useState(
     initialData?.isPublished || false
   );
+  const [name, setName] = useState(initialData?.name || "");
+  const [slug, setSlug] = useState(initialData?.slug || "");
+  const [description, setDescription] = useState(initialData?.description || "");
   const isEdit = !!initialData;
+
+  function handlePresetSelect(presetId: string) {
+    if (presetId === "custom") return;
+    const preset = SKILL_PRESETS.find((p) => p.id === presetId);
+    if (preset) {
+      if (!isEdit) {
+        setName(preset.name);
+        setSlug(preset.slug);
+        setDescription(preset.description);
+      }
+      setTemplate(preset.template);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const formData = new FormData(e.currentTarget);
     const body = {
-      slug: formData.get("slug") as string,
-      name: formData.get("name") as string,
-      description: (formData.get("description") as string) || undefined,
+      slug,
+      name,
+      description: description || undefined,
       instructionTemplate: template,
       credentialIds,
       isPublished,
@@ -72,7 +97,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error || "Failed to save skill");
+      setError(data.error || t("skills.failedToSave"));
       setLoading(false);
       return;
     }
@@ -89,50 +114,71 @@ export function SkillForm({ initialData }: SkillFormProps) {
         </div>
       )}
 
+      {!isEdit && (
+        <div className="space-y-2">
+          <Label>{t("skills.form.preset")}</Label>
+          <Select onValueChange={(v: string | null) => { if (v) handlePresetSelect(v); }}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("skills.form.selectPreset")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="custom">{t("skills.form.customTemplate")}</SelectItem>
+              {SKILL_PRESETS.map((preset) => (
+                <SelectItem key={preset.id} value={preset.id}>
+                  {preset.name} — {preset.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="name">Skill Name</Label>
+          <Label htmlFor="name">{t("skills.form.name")}</Label>
           <Input
             id="name"
             name="name"
-            placeholder="e.g. Send Email via Gmail"
-            defaultValue={initialData?.name}
+            placeholder={t("skills.form.namePlaceholder")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="slug">Slug</Label>
+          <Label htmlFor="slug">{t("skills.form.slug")}</Label>
           <Input
             id="slug"
             name="slug"
-            placeholder="e.g. send-email-gmail"
-            defaultValue={initialData?.slug}
+            placeholder={t("skills.form.slugPlaceholder")}
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
             required
             disabled={isEdit}
             pattern="[a-z0-9-]+"
             className="font-mono"
           />
           <p className="text-xs text-muted-foreground">
-            Used in the API URL: /api/skills/[slug]
+            {t("skills.form.slugHelp")}
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t("skills.form.description")}</Label>
         <Input
           id="description"
           name="description"
-          placeholder="Brief description of what this skill does"
-          defaultValue={initialData?.description || ""}
+          placeholder={t("skills.form.descriptionPlaceholder")}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Instruction Template</Label>
+        <Label>{t("skills.form.template")}</Label>
         <p className="text-xs text-muted-foreground">
-          Use {"{{credentialName}}"} placeholders for credential values. They
-          will be replaced when the skill is installed.
+          {t("skills.form.templateHelp")}
         </p>
         <div className="overflow-hidden rounded-lg border">
           <MonacoEditor
@@ -154,9 +200,9 @@ export function SkillForm({ initialData }: SkillFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label>Linked Credentials</Label>
+        <Label>{t("skills.form.linkedCredentials")}</Label>
         <p className="text-xs text-muted-foreground">
-          Select which credentials this skill needs access to.
+          {t("skills.form.linkedCredentialsHelp")}
         </p>
         <CredentialPicker
           selected={credentialIds}
@@ -169,19 +215,19 @@ export function SkillForm({ initialData }: SkillFormProps) {
           checked={isPublished}
           onCheckedChange={setIsPublished}
         />
-        <Label>Published (accessible via API)</Label>
+        <Label>{t("skills.form.published")}</Label>
       </div>
 
       <div className="flex gap-2">
         <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : isEdit ? "Update Skill" : "Create Skill"}
+          {loading ? t("common.saving") : isEdit ? t("skills.form.updateSkill") : t("skills.form.createSkill")}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => router.back()}
         >
-          Cancel
+          {t("common.cancel")}
         </Button>
       </div>
     </form>

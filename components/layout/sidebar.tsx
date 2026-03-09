@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/i18n/context";
+import type { LocaleKeys } from "@/lib/i18n/locales/en";
 import {
   Shield,
   Key,
   Zap,
   Monitor,
-  Coins,
   ScrollText,
   Settings,
   LayoutDashboard,
@@ -16,14 +17,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const navItems = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/credentials", label: "Credentials", icon: Key },
-  { href: "/dashboard/skills", label: "Skills", icon: Zap },
-  { href: "/dashboard/machines", label: "Machines", icon: Monitor },
-  { href: "/dashboard/tokens", label: "Tokens", icon: Coins },
-  { href: "/dashboard/logs", label: "Logs", icon: ScrollText },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+const navItems: { href: string; labelKey: LocaleKeys; icon: typeof Key }[] = [
+  { href: "/dashboard", labelKey: "nav.overview", icon: LayoutDashboard },
+  { href: "/dashboard/credentials", labelKey: "nav.credentials", icon: Key },
+  { href: "/dashboard/skills", labelKey: "nav.skills", icon: Zap },
+  { href: "/dashboard/machines", labelKey: "nav.machines", icon: Monitor },
+  { href: "/dashboard/logs", labelKey: "nav.logs", icon: ScrollText },
+  { href: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
 ];
 
 export function Sidebar({
@@ -34,6 +34,7 @@ export function Sidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
+  const { t } = useLocale();
 
   return (
     <>
@@ -52,7 +53,7 @@ export function Sidebar({
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <Shield className="size-5 text-primary" />
-            <span className="text-lg font-semibold">Hamster</span>
+            <span className="text-lg font-semibold">{t("brand.name")}</span>
           </Link>
           <Button
             variant="ghost"
@@ -81,7 +82,7 @@ export function Sidebar({
                 )}
               >
                 <item.icon className="size-4" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             );
           })}

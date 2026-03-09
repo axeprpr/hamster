@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useLocale } from "@/lib/i18n/context";
 
 interface LogEntry {
   id: string;
@@ -26,6 +27,7 @@ interface LogEntry {
 }
 
 export default function LogsPage() {
+  const { t } = useLocale();
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,9 +41,9 @@ export default function LogsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Access Logs" />
+        <PageHeader title={t("logs.title")} />
         <div className="flex items-center justify-center py-16 text-muted-foreground">
-          Loading...
+          {t("common.loading")}
         </div>
       </div>
     );
@@ -50,26 +52,26 @@ export default function LogsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Access Logs"
-        description="Monitor skill installation attempts and API access"
+        title={t("logs.title")}
+        description={t("logs.description")}
       />
 
       {logs.length === 0 ? (
         <EmptyState
           icon={ScrollText}
-          title="No logs yet"
-          description="Access logs will appear here when AI tools interact with your skills."
+          title={t("logs.noLogs")}
+          description={t("logs.noLogsDescription")}
         />
       ) : (
         <div className="rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Time</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>IP Address</TableHead>
-                <TableHead>Details</TableHead>
+                <TableHead>{t("logs.table.time")}</TableHead>
+                <TableHead>{t("logs.table.action")}</TableHead>
+                <TableHead>{t("logs.table.status")}</TableHead>
+                <TableHead>{t("logs.table.ip")}</TableHead>
+                <TableHead>{t("logs.table.details")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -1,68 +1,67 @@
+"use client";
+
 import { Shield, Key, Zap, Monitor, Lock, RefreshCcw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocale } from "@/lib/i18n/context";
+import type { LocaleKeys } from "@/lib/i18n/locales/en";
 
-const features = [
+const features: { icon: typeof Lock; titleKey: LocaleKeys; descKey: LocaleKeys }[] = [
   {
     icon: Lock,
-    title: "AES-256-GCM Encryption",
-    description:
-      "Every credential is encrypted with military-grade encryption. Each entry has its own unique IV for maximum security.",
+    titleKey: "landing.features.encryption.title",
+    descKey: "landing.features.encryption.description",
   },
   {
     icon: Key,
-    title: "Unified Credential Store",
-    description:
-      "Manage email SMTP, OSS keys, IM tokens, API keys, and database credentials all in one place.",
+    titleKey: "landing.features.store.title",
+    descKey: "landing.features.store.description",
   },
   {
     icon: Zap,
-    title: "Skill Templates",
-    description:
-      "Create reusable instruction templates with credential placeholders. AI tools get exactly what they need.",
+    titleKey: "landing.features.skills.title",
+    descKey: "landing.features.skills.description",
   },
   {
     icon: Monitor,
-    title: "Machine Authorization",
-    description:
-      "Control which machines can install skills. Authorize devices and revoke access anytime.",
+    titleKey: "landing.features.machines.title",
+    descKey: "landing.features.machines.description",
   },
   {
     icon: Shield,
-    title: "Two-Step Verification",
-    description:
-      "AI tools first read public instructions, then authenticate with machine code and token to get credentials.",
+    titleKey: "landing.features.verification.title",
+    descKey: "landing.features.verification.description",
   },
   {
     icon: RefreshCcw,
-    title: "Access Logging",
-    description:
-      "Track every installation attempt with detailed logs. Monitor who accessed what and when.",
+    titleKey: "landing.features.logging.title",
+    descKey: "landing.features.logging.description",
   },
 ];
 
 export function Features() {
+  const { t } = useLocale();
+
   return (
     <section className="px-4 py-20">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">
-            Everything you need to manage AI credentials
+            {t("landing.features.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-            Secure, organized, and easy to use. Hamster handles the complexity
-            so your AI tools just work.
+            {t("landing.features.description")}
           </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <Card key={feature.title}>
+            <Card key={feature.titleKey}>
               <CardHeader>
                 <feature.icon className="mb-2 size-8 text-primary" />
-                <CardTitle className="text-base">{feature.title}</CardTitle>
+                <CardTitle className="text-base">{t(feature.titleKey)}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  {feature.description}
+                  {t(feature.descKey)}
                 </p>
               </CardContent>
             </Card>

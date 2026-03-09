@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,13 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { CopyButton } from "@/components/shared/copy-button";
+import { useLocale } from "@/lib/i18n/context";
+
+const MACHINE_COMMANDS = {
+  linux: "cat /etc/machine-id",
+  macos: `ioreg -d2 -c IOPlatformExpertDevice | awk -F\\" '/IOPlatformUUID/{print $(NF-1)}'`,
+  windows: `powershell -Command "(Get-CimInstance -Class Win32_ComputerSystemProduct).UUID"`,
+};
 
 interface Machine {
   id: string;
@@ -30,6 +38,7 @@ interface Machine {
 }
 
 export default function MachinesPage() {
+  const { t } = useLocale();
   const [machines, setMachines] = useState<Machine[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -92,9 +101,9 @@ export default function MachinesPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Machines" />
+        <PageHeader title={t("machines.title")} />
         <div className="flex items-center justify-center py-16 text-muted-foreground">
-          Loading...
+          {t("common.loading")}
         </div>
       </div>
     );
@@ -103,12 +112,12 @@ export default function MachinesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Machines"
-        description="Authorize machines that can install skills"
+        title={t("machines.title")}
+        description={t("machines.description")}
         action={
           <Button onClick={() => setShowAdd(true)}>
             <Plus className="size-4" />
-            Add Machine
+            {t("machines.add")}
           </Button>
         }
       />
@@ -116,12 +125,12 @@ export default function MachinesPage() {
       {machines.length === 0 ? (
         <EmptyState
           icon={Monitor}
-          title="No machines authorized"
-          description="Add a machine code to allow AI tools to install skills."
+          title={t("machines.noMachines")}
+          description={t("machines.noMachinesDescription")}
           action={
             <Button onClick={() => setShowAdd(true)}>
               <Plus className="size-4" />
-              Add Machine
+              {t("machines.add")}
             </Button>
           }
         />
@@ -132,7 +141,7 @@ export default function MachinesPage() {
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div>
                   <CardTitle className="text-base">
-                    {machine.label || "Unnamed Machine"}
+                    {machine.label || t("machines.unnamed")}
                   </CardTitle>
                   <div className="flex items-center gap-1 mt-1">
                     <code className="text-xs text-muted-foreground">
@@ -142,15 +151,15 @@ export default function MachinesPage() {
                   </div>
                 </div>
                 <Badge variant={machine.isActive ? "default" : "secondary"}>
-                  {machine.isActive ? "Active" : "Inactive"}
+                  {machine.isActive ? t("common.active") : t("common.inactive")}
                 </Badge>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-muted-foreground">
                     {machine.lastUsedAt
-                      ? `Last used: ${new Date(machine.lastUsedAt).toLocaleDateString()}`
-                      : "Never used"}
+                      ? t("common.lastUsed", { date: new Date(machine.lastUsedAt).toLocaleDateString() })
+                      : t("common.neverUsed")}
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
@@ -162,7 +171,7 @@ export default function MachinesPage() {
                       size="icon-xs"
                       onClick={() => setDeleteId(machine.id)}
                     >
-                      <span className="text-xs text-destructive">Delete</span>
+                      <span className="text-xs text-destructive">{t("common.delete")}</span>
                     </Button>
                   </div>
                 </div>
@@ -173,50 +182,74 @@ export default function MachinesPage() {
       )}
 
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Machine</DialogTitle>
+            <DialogTitle>{t("machines.add")}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAdd} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="machineCode">Machine Code</Label>
-              <Input
-                id="machineCode"
-                name="machineCode"
-                placeholder="Unique machine identifier"
-                required
-                className="font-mono"
-              />
+
+          <div className="space-y-4">
+            <div className="rounded-lg border bg-muted/50 p-3">
+              <p className="text-sm font-medium mb-2">{t("machines.form.getCodeTitle")}</p>
+              <Tabs defaultValue="linux">
+                <TabsList className="w-full">
+                  <TabsTrigger value="linux" className="flex-1">{t("machines.form.linux")}</TabsTrigger>
+                  <TabsTrigger value="macos" className="flex-1">{t("machines.form.macos")}</TabsTrigger>
+                  <TabsTrigger value="windows" className="flex-1">{t("machines.form.windows")}</TabsTrigger>
+                </TabsList>
+                {(Object.entries(MACHINE_COMMANDS) as [string, string][]).map(([os, cmd]) => (
+                  <TabsContent key={os} value={os}>
+                    <div className="flex items-center gap-2 rounded-md bg-black p-3">
+                      <code className="flex-1 text-xs text-green-400 font-mono break-all">
+                        {cmd}
+                      </code>
+                      <CopyButton value={cmd} />
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="label">Label (optional)</Label>
-              <Input
-                id="label"
-                name="label"
-                placeholder="e.g. Work Laptop"
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowAdd(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={adding}>
-                {adding ? "Adding..." : "Add Machine"}
-              </Button>
-            </DialogFooter>
-          </form>
+
+            <form onSubmit={handleAdd} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="machineCode">{t("machines.form.machineCode")}</Label>
+                <Input
+                  id="machineCode"
+                  name="machineCode"
+                  placeholder={t("machines.form.machineCodePlaceholder")}
+                  required
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="label">{t("machines.form.label")}</Label>
+                <Input
+                  id="label"
+                  name="label"
+                  placeholder={t("machines.form.labelPlaceholder")}
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowAdd(false)}
+                >
+                  {t("common.cancel")}
+                </Button>
+                <Button type="submit" disabled={adding}>
+                  {adding ? t("machines.adding") : t("machines.add")}
+                </Button>
+              </DialogFooter>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
 
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
-        title="Delete machine"
-        description="This machine will no longer be able to install skills."
+        title={t("machines.deleteTitle")}
+        description={t("machines.deleteDescription")}
         onConfirm={handleDelete}
         loading={deleting}
         destructive

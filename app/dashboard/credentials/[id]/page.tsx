@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { CredentialForm } from "@/components/credentials/credential-form";
+import { useLocale } from "@/lib/i18n/context";
 
 export default function EditCredentialPage({
   params,
@@ -10,12 +11,14 @@ export default function EditCredentialPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { t } = useLocale();
   const [data, setData] = useState<{
     id: string;
     name: string;
     category: string;
     value: string;
     description?: string;
+    metadata?: Record<string, string> | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,9 +32,9 @@ export default function EditCredentialPage({
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Edit Credential" />
+        <PageHeader title={t("credentials.edit")} />
         <div className="flex items-center justify-center py-16 text-muted-foreground">
-          Loading...
+          {t("common.loading")}
         </div>
       </div>
     );
@@ -40,7 +43,7 @@ export default function EditCredentialPage({
   if (!data) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Credential not found" />
+        <PageHeader title={t("credentials.notFound")} />
       </div>
     );
   }
@@ -48,8 +51,8 @@ export default function EditCredentialPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Credential"
-        description={`Editing "${data.name}"`}
+        title={t("credentials.edit")}
+        description={t("credentials.editing", { name: data.name })}
       />
       <CredentialForm initialData={data} />
     </div>

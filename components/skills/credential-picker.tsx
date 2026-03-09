@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/credentials/category-icon";
+import { useLocale } from "@/lib/i18n/context";
 
 interface Credential {
   id: string;
@@ -19,6 +20,7 @@ export function CredentialPicker({
   onChange: (ids: string[]) => void;
 }) {
   const [credentials, setCredentials] = useState<Credential[]>([]);
+  const { t } = useLocale();
 
   useEffect(() => {
     fetch("/api/credentials")
@@ -37,7 +39,7 @@ export function CredentialPicker({
   if (credentials.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No credentials available. Create some first.
+        {t("credentials.noCredentials")}
       </p>
     );
   }

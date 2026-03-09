@@ -19,6 +19,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { useLocale } from "@/lib/i18n/context";
 
 interface Token {
   id: string;
@@ -30,6 +31,7 @@ interface Token {
 }
 
 export default function TokensPage() {
+  const { t } = useLocale();
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -82,8 +84,8 @@ export default function TokensPage() {
     setRevoking(true);
     await fetch(`/api/tokens/${revokeId}`, { method: "DELETE" });
     setTokens((prev) =>
-      prev.map((t) =>
-        t.id === revokeId ? { ...t, isRevoked: true } : t
+      prev.map((tk) =>
+        tk.id === revokeId ? { ...tk, isRevoked: true } : tk
       )
     );
     setRevokeId(null);
@@ -91,18 +93,18 @@ export default function TokensPage() {
   }
 
   function getStatus(token: Token) {
-    if (token.isRevoked) return { label: "Revoked", variant: "destructive" as const };
+    if (token.isRevoked) return { label: t("tokens.status.revoked"), variant: "destructive" as const };
     if (token.expiresAt && new Date(token.expiresAt) < new Date())
-      return { label: "Expired", variant: "secondary" as const };
-    return { label: "Active", variant: "default" as const };
+      return { label: t("tokens.status.expired"), variant: "secondary" as const };
+    return { label: t("tokens.status.active"), variant: "default" as const };
   }
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Tokens" />
+        <PageHeader title={t("tokens.title")} />
         <div className="flex items-center justify-center py-16 text-muted-foreground">
-          Loading...
+          {t("common.loading")}
         </div>
       </div>
     );
@@ -111,12 +113,12 @@ export default function TokensPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Access Tokens"
-        description="Generate tokens for AI tools to authenticate"
+        title={t("tokens.title")}
+        description={t("tokens.description")}
         action={
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="size-4" />
-            Generate Token
+            {t("tokens.generate")}
           </Button>
         }
       />
@@ -125,7 +127,7 @@ export default function TokensPage() {
         <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-900 dark:bg-orange-950/30">
           <div className="flex items-center gap-2 text-sm font-medium text-orange-800 dark:text-orange-200">
             <AlertTriangle className="size-4" />
-            Copy your token now. It won&apos;t be shown again.
+            {t("tokens.copyWarning")}
           </div>
           <div className="mt-2 flex items-center gap-2">
             <code className="flex-1 break-all rounded bg-white px-3 py-2 text-sm font-mono dark:bg-black">
@@ -139,7 +141,7 @@ export default function TokensPage() {
             className="mt-2"
             onClick={() => setNewToken(null)}
           >
-            Dismiss
+            {t("common.dismiss")}
           </Button>
         </div>
       )}
@@ -147,12 +149,12 @@ export default function TokensPage() {
       {tokens.length === 0 ? (
         <EmptyState
           icon={Coins}
-          title="No tokens yet"
-          description="Generate an access token for AI tools to install skills."
+          title={t("tokens.noTokens")}
+          description={t("tokens.noTokensDescription")}
           action={
             <Button onClick={() => setShowCreate(true)}>
               <Plus className="size-4" />
-              Generate Token
+              {t("tokens.generate")}
             </Button>
           }
         />
@@ -164,18 +166,18 @@ export default function TokensPage() {
               <Card key={token.id}>
                 <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                   <CardTitle className="text-base">
-                    {token.name || "Unnamed Token"}
+                    {token.name || t("tokens.unnamed")}
                   </CardTitle>
                   <Badge variant={status.variant}>{status.label}</Badge>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 text-xs text-muted-foreground">
                     <div>
-                      Created: {new Date(token.createdAt).toLocaleDateString()}
+                      {t("common.created", { date: new Date(token.createdAt).toLocaleDateString() })}
                     </div>
                     {token.expiresAt && (
                       <div>
-                        Expires: {new Date(token.expiresAt).toLocaleDateString()}
+                        {t("common.expires", { date: new Date(token.expiresAt).toLocaleDateString() })}
                       </div>
                     )}
                   </div>
@@ -186,7 +188,7 @@ export default function TokensPage() {
                       className="mt-2 text-destructive"
                       onClick={() => setRevokeId(token.id)}
                     >
-                      Revoke
+                      {t("common.revoke")}
                     </Button>
                   )}
                 </CardContent>
@@ -199,22 +201,22 @@ export default function TokensPage() {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Generate Access Token</DialogTitle>
+            <DialogTitle>{t("tokens.generateTitle")}</DialogTitle>
             <DialogDescription>
-              Create a new token for AI tools to authenticate when installing skills.
+              {t("tokens.generateDescription")}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="tokenName">Name (optional)</Label>
+              <Label htmlFor="tokenName">{t("tokens.form.name")}</Label>
               <Input
                 id="tokenName"
                 name="name"
-                placeholder="e.g. Claude Desktop Token"
+                placeholder={t("tokens.form.namePlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="expiresInDays">Expires in (days, optional)</Label>
+              <Label htmlFor="expiresInDays">{t("tokens.form.expires")}</Label>
               <Input
                 id="expiresInDays"
                 name="expiresInDays"
@@ -229,10 +231,10 @@ export default function TokensPage() {
                 variant="outline"
                 onClick={() => setShowCreate(false)}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={creating}>
-                {creating ? "Generating..." : "Generate"}
+                {creating ? t("tokens.generating") : t("common.generate")}
               </Button>
             </DialogFooter>
           </form>
@@ -242,8 +244,8 @@ export default function TokensPage() {
       <ConfirmDialog
         open={!!revokeId}
         onOpenChange={(open) => !open && setRevokeId(null)}
-        title="Revoke token"
-        description="This token will immediately stop working. This cannot be undone."
+        title={t("tokens.revokeTitle")}
+        description={t("tokens.revokeDescription")}
         onConfirm={handleRevoke}
         loading={revoking}
         destructive

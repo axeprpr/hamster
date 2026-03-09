@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { skills, credentials, machines, accessTokens, accessLogs } from "@/lib/db/schema";
+import { skills, credentials, machines, accessLogs } from "@/lib/db/schema";
 import { installSchema } from "@/lib/validations";
 import { decrypt } from "@/lib/crypto";
 import { eq, and } from "drizzle-orm";
-import { hash, compare } from "bcryptjs";
 
 export async function POST(
   request: Request,
@@ -26,7 +25,7 @@ export async function POST(
       );
     }
 
-    const { machineCode, token } = parsed.data;
+    const { machineCode } = parsed.data;
 
     // Find the skill
     const [skill] = await db
@@ -56,36 +55,6 @@ export async function POST(
       await logAccess(skill.userId, skill.id, null, ipAddress, "install", false, "Machine not found or inactive");
       return NextResponse.json(
         { error: "Machine not authorized" },
-        { status: 403 }
-      );
-    }
-
-    // Find and verify token
-    const userTokens = await db
-      .select()
-      .from(accessTokens)
-      .where(
-        and(
-          eq(accessTokens.userId, skill.userId),
-          eq(accessTokens.isRevoked, false)
-        )
-      );
-
-    let validToken = null;
-    for (const t of userTokens) {
-      if (t.expiresAt && t.expiresAt < new Date()) continue;
-      if (t.machineId && t.machineId !== machine.id) continue;
-      const isMatch = await compare(token, t.tokenHash);
-      if (isMatch) {
-        validToken = t;
-        break;
-      }
-    }
-
-    if (!validToken) {
-      await logAccess(skill.userId, skill.id, machine.id, ipAddress, "install", false, "Invalid token");
-      return NextResponse.json(
-        { error: "Invalid or expired token" },
         { status: 403 }
       );
     }

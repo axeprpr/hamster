@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Key, Zap, Monitor, Coins, ScrollText, ArrowRight } from "lucide-react";
+import { Key, Zap, Monitor, ScrollText, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
+import { useLocale } from "@/lib/i18n/context";
 
 interface Stats {
   credentials: number;
   skills: number;
   machines: number;
-  tokens: number;
   recentLogs: Array<{
     id: string;
     action: string;
@@ -21,11 +21,11 @@ interface Stats {
 }
 
 export default function DashboardPage() {
+  const { t } = useLocale();
   const [stats, setStats] = useState<Stats>({
     credentials: 0,
     skills: 0,
     machines: 0,
-    tokens: 0,
     recentLogs: [],
   });
   const [loading, setLoading] = useState(true);
@@ -35,15 +35,13 @@ export default function DashboardPage() {
       fetch("/api/credentials").then((r) => r.json()),
       fetch("/api/skills").then((r) => r.json()),
       fetch("/api/machines").then((r) => r.json()),
-      fetch("/api/tokens").then((r) => r.json()),
       fetch("/api/logs?limit=5").then((r) => r.json()),
     ])
-      .then(([credentials, skills, machines, tokens, logs]) => {
+      .then(([credentials, skills, machines, logs]) => {
         setStats({
           credentials: credentials.length,
           skills: skills.length,
           machines: machines.length,
-          tokens: tokens.length,
           recentLogs: logs,
         });
       })
@@ -52,39 +50,33 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: "Credentials",
+      title: t("nav.credentials"),
       value: stats.credentials,
       icon: Key,
       href: "/dashboard/credentials",
     },
     {
-      title: "Skills",
+      title: t("nav.skills"),
       value: stats.skills,
       icon: Zap,
       href: "/dashboard/skills",
     },
     {
-      title: "Machines",
+      title: t("nav.machines"),
       value: stats.machines,
       icon: Monitor,
       href: "/dashboard/machines",
-    },
-    {
-      title: "Tokens",
-      value: stats.tokens,
-      icon: Coins,
-      href: "/dashboard/tokens",
     },
   ];
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Dashboard"
-        description="Overview of your credential management"
+        title={t("dashboard.title")}
+        description={t("dashboard.description")}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((stat) => (
           <Link key={stat.title} href={stat.href}>
             <Card className="transition-colors hover:bg-muted/50">
@@ -106,18 +98,18 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-base">Recent Activity</CardTitle>
+          <CardTitle className="text-base">{t("dashboard.recentActivity")}</CardTitle>
           <Button variant="ghost" size="sm" render={<Link href="/dashboard/logs" />}>
-              View All <ArrowRight className="size-3" />
+            {t("dashboard.viewAll")} <ArrowRight className="size-3" />
           </Button>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
           ) : stats.recentLogs.length === 0 ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <ScrollText className="size-4" />
-              No activity yet
+              {t("dashboard.noActivity")}
             </div>
           ) : (
             <div className="space-y-2">

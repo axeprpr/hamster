@@ -9,16 +9,19 @@ import { CredentialCard } from "@/components/credentials/credential-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { CREDENTIAL_CATEGORIES } from "@/components/credentials/category-icon";
+import { useLocale } from "@/lib/i18n/context";
 
 interface Credential {
   id: string;
   name: string;
   category: string;
   description?: string | null;
+  metadata?: Record<string, string> | null;
   createdAt: string;
 }
 
 export default function CredentialsPage() {
+  const { t } = useLocale();
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -49,9 +52,9 @@ export default function CredentialsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Credentials" />
+        <PageHeader title={t("credentials.title")} />
         <div className="flex items-center justify-center py-16 text-muted-foreground">
-          Loading...
+          {t("common.loading")}
         </div>
       </div>
     );
@@ -60,12 +63,12 @@ export default function CredentialsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Credentials"
-        description="Manage your encrypted credentials for AI skills"
+        title={t("credentials.title")}
+        description={t("credentials.description")}
         action={
           <Button render={<Link href="/dashboard/credentials/new" />}>
-              <Plus className="size-4" />
-              Add Credential
+            <Plus className="size-4" />
+            {t("credentials.add")}
           </Button>
         }
       />
@@ -77,7 +80,7 @@ export default function CredentialsPage() {
             size="sm"
             onClick={() => setFilter("all")}
           >
-            All ({credentials.length})
+            {t("credentials.all")} ({credentials.length})
           </Button>
           {CREDENTIAL_CATEGORIES.map((cat) => {
             const count = credentials.filter(
@@ -101,12 +104,12 @@ export default function CredentialsPage() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={Key}
-          title="No credentials yet"
-          description="Add your first credential to get started with AI skills."
+          title={t("credentials.noCredentials")}
+          description={t("credentials.noCredentialsDescription")}
           action={
             <Button render={<Link href="/dashboard/credentials/new" />}>
-                <Plus className="size-4" />
-                Add Credential
+              <Plus className="size-4" />
+              {t("credentials.add")}
             </Button>
           }
         />
@@ -125,8 +128,8 @@ export default function CredentialsPage() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
-        title="Delete credential"
-        description="This action cannot be undone. Skills using this credential will no longer work."
+        title={t("credentials.deleteTitle")}
+        description={t("credentials.deleteDescription")}
         onConfirm={handleDelete}
         loading={deleting}
         destructive

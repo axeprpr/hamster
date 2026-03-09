@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { SkillForm } from "@/components/skills/skill-form";
+import { useLocale } from "@/lib/i18n/context";
 
 export default function EditSkillPage({
   params,
@@ -10,6 +11,7 @@ export default function EditSkillPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
+  const { t } = useLocale();
   const [data, setData] = useState<{
     slug: string;
     name: string;
@@ -33,9 +35,9 @@ export default function EditSkillPage({
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Edit Skill" />
+        <PageHeader title={t("skills.edit")} />
         <div className="flex items-center justify-center py-16 text-muted-foreground">
-          Loading...
+          {t("common.loading")}
         </div>
       </div>
     );
@@ -44,7 +46,7 @@ export default function EditSkillPage({
   if (!data) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Skill not found" />
+        <PageHeader title={t("skills.notFound")} />
       </div>
     );
   }
@@ -52,8 +54,8 @@ export default function EditSkillPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Skill"
-        description={`Editing "${data.name}"`}
+        title={t("skills.edit")}
+        description={t("skills.editing", { name: data.name })}
       />
       <SkillForm initialData={data} />
     </div>

@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CategoryIcon } from "./category-icon";
+import { getSubType } from "@/lib/credential-types";
 
 interface Credential {
   id: string;
   name: string;
   category: string;
   description?: string | null;
+  metadata?: Record<string, string> | null;
   createdAt: string;
 }
 
@@ -22,6 +24,9 @@ export function CredentialCard({
   credential: Credential;
   onDelete: (id: string) => void;
 }) {
+  const subTypeValue = credential.metadata?.type;
+  const subType = subTypeValue ? getSubType(subTypeValue) : undefined;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
@@ -30,7 +35,7 @@ export function CredentialCard({
           <CardTitle className="text-base">{credential.name}</CardTitle>
         </div>
         <Badge variant="secondary" className="text-xs">
-          {credential.category}
+          {subType ? subType.label : credential.category}
         </Badge>
       </CardHeader>
       <CardContent>

@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SkillCard } from "@/components/skills/skill-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { useLocale } from "@/lib/i18n/context";
 
 interface Skill {
   id: string;
@@ -20,6 +21,7 @@ interface Skill {
 }
 
 export default function SkillsPage() {
+  const { t } = useLocale();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
@@ -44,9 +46,9 @@ export default function SkillsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Skills" />
+        <PageHeader title={t("skills.title")} />
         <div className="flex items-center justify-center py-16 text-muted-foreground">
-          Loading...
+          {t("common.loading")}
         </div>
       </div>
     );
@@ -55,12 +57,12 @@ export default function SkillsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Skills"
-        description="Create and manage AI skill configurations"
+        title={t("skills.title")}
+        description={t("skills.description")}
         action={
           <Button render={<Link href="/dashboard/skills/new" />}>
-              <Plus className="size-4" />
-              New Skill
+            <Plus className="size-4" />
+            {t("skills.new")}
           </Button>
         }
       />
@@ -68,12 +70,12 @@ export default function SkillsPage() {
       {skills.length === 0 ? (
         <EmptyState
           icon={Zap}
-          title="No skills yet"
-          description="Create your first skill to distribute AI configurations securely."
+          title={t("skills.noSkills")}
+          description={t("skills.noSkillsDescription")}
           action={
             <Button render={<Link href="/dashboard/skills/new" />}>
-                <Plus className="size-4" />
-                New Skill
+              <Plus className="size-4" />
+              {t("skills.new")}
             </Button>
           }
         />
@@ -92,8 +94,8 @@ export default function SkillsPage() {
       <ConfirmDialog
         open={!!deleteSlug}
         onOpenChange={(open) => !open && setDeleteSlug(null)}
-        title="Delete skill"
-        description="This action cannot be undone. The skill API endpoint will stop working."
+        title={t("skills.deleteTitle")}
+        description={t("skills.deleteDescription")}
         onConfirm={handleDelete}
         loading={deleting}
         destructive

@@ -1,38 +1,41 @@
+"use client";
+
+import { useLocale } from "@/lib/i18n/context";
+import type { LocaleKeys } from "@/lib/i18n/locales/en";
+
+const steps: { step: string; titleKey: LocaleKeys; descKey: LocaleKeys }[] = [
+  {
+    step: "01",
+    titleKey: "landing.howItWorks.step1.title",
+    descKey: "landing.howItWorks.step1.description",
+  },
+  {
+    step: "02",
+    titleKey: "landing.howItWorks.step2.title",
+    descKey: "landing.howItWorks.step2.description",
+  },
+  {
+    step: "03",
+    titleKey: "landing.howItWorks.step3.title",
+    descKey: "landing.howItWorks.step3.description",
+  },
+  {
+    step: "04",
+    titleKey: "landing.howItWorks.step4.title",
+    descKey: "landing.howItWorks.step4.description",
+  },
+];
+
 export function HowItWorks() {
-  const steps = [
-    {
-      step: "01",
-      title: "Store Credentials",
-      description:
-        "Add your email passwords, API keys, OSS credentials, and IM tokens. Everything is encrypted with AES-256-GCM.",
-    },
-    {
-      step: "02",
-      title: "Create Skills",
-      description:
-        "Build instruction templates with credential placeholders like {{smtp_password}}. Link the credentials each skill needs.",
-    },
-    {
-      step: "03",
-      title: "Authorize Machines",
-      description:
-        "Register the machine codes of devices that should be able to install skills. Generate access tokens.",
-    },
-    {
-      step: "04",
-      title: "AI Installs",
-      description:
-        "AI tools call the API with machine code and token. Hamster verifies, decrypts credentials, renders the template, and returns the complete configuration.",
-    },
-  ];
+  const { t } = useLocale();
 
   return (
     <section className="bg-muted/30 px-4 py-20">
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight">How it works</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t("landing.howItWorks.title")}</h2>
           <p className="mt-4 text-muted-foreground">
-            Four simple steps from storing credentials to AI-powered installation.
+            {t("landing.howItWorks.description")}
           </p>
         </div>
         <div className="mt-12 space-y-8">
@@ -47,9 +50,9 @@ export function HowItWorks() {
                 )}
               </div>
               <div className="pb-8">
-                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <h3 className="text-lg font-semibold">{t(item.titleKey)}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {item.description}
+                  {t(item.descKey)}
                 </p>
               </div>
             </div>

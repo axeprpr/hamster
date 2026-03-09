@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n/context";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -29,6 +30,8 @@ export function ConfirmDialog({
   loading,
   destructive,
 }: ConfirmDialogProps) {
+  const { t } = useLocale();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -42,14 +45,14 @@ export function ConfirmDialog({
             onClick={() => onOpenChange(false)}
             disabled={loading}
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant={destructive ? "destructive" : "default"}
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? "Processing..." : "Confirm"}
+            {loading ? t("common.loading") : t("common.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>

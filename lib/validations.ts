@@ -60,5 +60,4 @@ export const tokenSchema = z.object({
 
 export const installSchema = z.object({
   machineCode: z.string().min(1, "Machine code is required"),
-  token: z.string().min(1, "Token is required"),
 });
