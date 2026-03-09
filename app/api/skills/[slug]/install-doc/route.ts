@@ -23,7 +23,66 @@ export async function GET(
       });
     }
 
-    return new NextResponse(skill.instructionTemplate, {
+    // Build the origin from the request URL
+    const url = new URL(request.url);
+    const origin = url.origin;
+
+    const installDoc = `# ${skill.name} — Installation Guide
+
+${skill.description ? `> ${skill.description}\n` : ""}
+## Step 1: Get Machine Code
+
+First, detect the user's operating system and run the appropriate command to get the machine code:
+
+**Linux:**
+\`\`\`bash
+cat /etc/machine-id
+\`\`\`
+
+**macOS:**
+\`\`\`bash
+ioreg -d2 -c IOPlatformExpertDevice | awk -F\\" '/IOPlatformUUID/{print $(NF-1)}'
+\`\`\`
+
+**Windows (PowerShell):**
+\`\`\`powershell
+(Get-CimInstance -Class Win32_ComputerSystemProduct).UUID
+\`\`\`
+
+Save the output as \`machineCode\`.
+
+## Step 2: Fetch Credentials
+
+Send the machine code to the install endpoint to receive the complete instruction with decrypted credentials:
+
+\`\`\`bash
+curl -X POST ${origin}/api/skills/${skill.slug}/install \\
+  -H "Content-Type: application/json" \\
+  -d '{"machineCode": "<machineCode from Step 1>"}'
+\`\`\`
+
+The response JSON will look like:
+\`\`\`json
+{
+  "skill": "${skill.name}",
+  "instruction": "... rendered instruction with real credential values ..."
+}
+\`\`\`
+
+## Step 3: Follow the Instruction
+
+Parse the \`instruction\` field from the response and follow the steps inside it to complete the installation and configuration.
+
+---
+
+### Instruction Template Preview
+
+The following is the instruction template. The \`{{placeholder}}\` values will be replaced with real credentials in Step 2.
+
+${skill.instructionTemplate}
+`;
+
+    return new NextResponse(installDoc, {
       status: 200,
       headers: { "Content-Type": "text/markdown; charset=utf-8" },
     });
