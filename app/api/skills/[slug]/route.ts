@@ -5,38 +5,6 @@ import { skills } from "@/lib/db/schema";
 import { skillUpdateSchema } from "@/lib/validations";
 import { eq, and } from "drizzle-orm";
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  const { slug } = await params;
-
-  // Public endpoint: returns skill description for AI tools
-  const [skill] = await db
-    .select({
-      slug: skills.slug,
-      name: skills.name,
-      description: skills.description,
-      instructionTemplate: skills.instructionTemplate,
-      isPublished: skills.isPublished,
-    })
-    .from(skills)
-    .where(and(eq(skills.slug, slug), eq(skills.isPublished, true)))
-    .limit(1);
-
-  if (!skill) {
-    return NextResponse.json({ error: "Skill not found" }, { status: 404 });
-  }
-
-  // Return the public instruction (without credential values)
-  return NextResponse.json({
-    slug: skill.slug,
-    name: skill.name,
-    description: skill.description,
-    instruction: skill.instructionTemplate,
-  });
-}
-
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }

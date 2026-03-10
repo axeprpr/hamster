@@ -36,7 +36,7 @@ export const skills = pgTable("skills", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  slug: text("slug").notNull().unique(),
+  slug: text("slug").notNull(),
   name: text("name").notNull(),
   description: text("description"),
   instructionTemplate: text("instruction_template").notNull(),

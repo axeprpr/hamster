@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
 import { skillSchema } from "@/lib/validations";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function GET() {
   const session = await auth();
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const existing = await db
       .select({ id: skills.id })
       .from(skills)
-      .where(eq(skills.slug, parsed.data.slug))
+      .where(and(eq(skills.slug, parsed.data.slug), eq(skills.userId, session.user.id)))
       .limit(1);
 
     if (existing.length > 0) {

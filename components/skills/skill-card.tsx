@@ -31,7 +31,7 @@ export function SkillCard({
 
   function handleCopyInstall() {
     const domain = typeof window !== "undefined" ? window.location.origin : "";
-    const prompt = `请参考 ${domain}/api/skills/${skill.slug}/install-doc 帮我安装和配置 ${skill.name}。`;
+    const prompt = `请参考 ${domain}/api/s/${skill.id}/install-doc 帮我安装和配置 ${skill.name}。`;
     navigator.clipboard.writeText(prompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
