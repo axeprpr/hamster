@@ -1,4 +1,4 @@
-import { randomBytes, createCipheriv, createDecipheriv } from "crypto";
+import { randomBytes, createCipheriv, createDecipheriv, createHash } from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 
@@ -44,4 +44,8 @@ export function decrypt(
 
 export function generateToken(): string {
   return randomBytes(32).toString("hex");
+}
+
+export function hashMachineCode(code: string): string {
+  return createHash("sha256").update(code.trim().toLowerCase()).digest("hex");
 }

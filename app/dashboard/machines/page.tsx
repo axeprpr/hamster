@@ -145,9 +145,8 @@ export default function MachinesPage() {
                   </CardTitle>
                   <div className="flex items-center gap-1 mt-1">
                     <code className="text-xs text-muted-foreground">
-                      {machine.machineCode}
+                      {machine.machineCode.substring(0, 12)}...
                     </code>
-                    <CopyButton value={machine.machineCode} />
                   </div>
                 </div>
                 <Badge variant={machine.isActive ? "default" : "secondary"}>

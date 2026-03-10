@@ -11,7 +11,12 @@ export async function GET(
 
   try {
     const [skill] = await db
-      .select()
+      .select({
+        id: skills.id,
+        name: skills.name,
+        description: skills.description,
+        isPublished: skills.isPublished,
+      })
       .from(skills)
       .where(and(eq(skills.id, id), eq(skills.isPublished, true)))
       .limit(1);
@@ -51,9 +56,9 @@ ioreg -d2 -c IOPlatformExpertDevice | awk -F\\\\" '/IOPlatformUUID/{print $(NF-1
 
 Save the output as \`machineCode\`.
 
-## Step 2: Fetch Credentials
+## Step 2: Fetch Installation Instructions
 
-Send the machine code to the install endpoint to receive the complete instruction with decrypted credentials:
+Send the machine code to the install endpoint to receive the complete instruction with all configuration values:
 
 \`\`\`bash
 curl -X POST ${origin}/api/s/${skill.id}/install \\
@@ -65,21 +70,13 @@ The response JSON will look like:
 \`\`\`json
 {
   "skill": "${skill.name}",
-  "instruction": "... rendered instruction with real credential values ..."
+  "instruction": "... complete installation instruction ..."
 }
 \`\`\`
 
 ## Step 3: Follow the Instruction
 
 Parse the \`instruction\` field from the response and follow the steps inside it to complete the installation and configuration.
-
----
-
-### Instruction Template Preview
-
-The following is the instruction template. The \`{{placeholder}}\` values will be replaced with real credentials in Step 2.
-
-${skill.instructionTemplate}
 `;
 
     return new NextResponse(installDoc, {

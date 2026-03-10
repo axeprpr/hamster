@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { skills, credentials, machines, accessLogs } from "@/lib/db/schema";
 import { installSchema } from "@/lib/validations";
-import { decrypt } from "@/lib/crypto";
-import { eq, and } from "drizzle-orm";
+import { decrypt, hashMachineCode } from "@/lib/crypto";
+import { eq, and, gt, sql } from "drizzle-orm";
+
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_MAX_FAILURES = 10;
 
 export async function POST(
   request: Request,
@@ -11,9 +14,34 @@ export async function POST(
 ) {
   const { id } = await params;
   const ipAddress =
-    request.headers.get("x-forwarded-for") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
     "unknown";
+
+  // --- Rate limiting: check recent failures from this IP ---
+  try {
+    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(accessLogs)
+      .where(
+        and(
+          eq(accessLogs.ipAddress, ipAddress),
+          eq(accessLogs.action, "install"),
+          eq(accessLogs.success, false),
+          gt(accessLogs.createdAt, windowStart)
+        )
+      );
+
+    if (count >= RATE_LIMIT_MAX_FAILURES) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+  } catch {
+    // If rate limit check fails, continue (fail open for availability)
+  }
 
   try {
     const body = await request.json();
@@ -35,26 +63,57 @@ export async function POST(
       .limit(1);
 
     if (!skill) {
-      return NextResponse.json({ error: "Skill not found" }, { status: 404 });
+      // Unified error: don't reveal whether skill exists
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
+      );
     }
 
-    // Find the machine
-    const [machine] = await db
+    // Hash the incoming machine code for comparison
+    const hashedCode = hashMachineCode(machineCode);
+
+    // Try matching by hash first (new entries)
+    let [machine] = await db
       .select()
       .from(machines)
       .where(
         and(
           eq(machines.userId, skill.userId),
-          eq(machines.machineCode, machineCode),
+          eq(machines.machineCode, hashedCode),
           eq(machines.isActive, true)
         )
       )
       .limit(1);
 
+    // Backward compat: try plaintext match for legacy entries
     if (!machine) {
-      await logAccess(skill.userId, skill.id, null, ipAddress, "install", false, "Machine not found or inactive");
+      [machine] = await db
+        .select()
+        .from(machines)
+        .where(
+          and(
+            eq(machines.userId, skill.userId),
+            eq(machines.machineCode, machineCode),
+            eq(machines.isActive, true)
+          )
+        )
+        .limit(1);
+
+      // Auto-migrate: update legacy plaintext to hash
+      if (machine) {
+        await db
+          .update(machines)
+          .set({ machineCode: hashedCode })
+          .where(eq(machines.id, machine.id));
+      }
+    }
+
+    if (!machine) {
+      await logAccess(skill.userId, skill.id, null, ipAddress, "install", false, "Denied");
+      // Unified error: same message for skill-not-found and machine-not-found
       return NextResponse.json(
-        { error: "Machine not authorized" },
+        { error: "Access denied" },
         { status: 403 }
       );
     }
@@ -77,10 +136,13 @@ export async function POST(
       }
     }
 
-    // Render template with credential values
+    // Render template — use safe string replacement (no RegExp)
     let rendered = skill.instructionTemplate;
     for (const [name, value] of Object.entries(credentialMap)) {
-      rendered = rendered.replace(new RegExp(`\\{\\{${name}\\}\\}`, "g"), value);
+      const placeholder = `{{${name}}}`;
+      while (rendered.includes(placeholder)) {
+        rendered = rendered.replace(placeholder, value);
+      }
     }
 
     // Update machine lastUsedAt

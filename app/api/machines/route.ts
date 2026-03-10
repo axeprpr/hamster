@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { machines } from "@/lib/db/schema";
 import { machineSchema } from "@/lib/validations";
+import { hashMachineCode } from "@/lib/crypto";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
@@ -36,11 +37,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const hashedCode = hashMachineCode(parsed.data.machineCode);
+
     const [machine] = await db
       .insert(machines)
       .values({
         userId: session.user.id,
         ...parsed.data,
+        machineCode: hashedCode,
       })
       .returning();
 
