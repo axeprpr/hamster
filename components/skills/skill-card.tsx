@@ -44,23 +44,19 @@ export function SkillCard({
   }
 
   return (
-    <Card className={cn(
-      "relative flex flex-col transition-shadow",
-      skill.isPublished && "group hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/30"
-    )}>
-      {/* Clickable area for copy - everything except the bottom action bar */}
-      <div
-        role={skill.isPublished ? "button" : undefined}
-        tabIndex={skill.isPublished ? 0 : undefined}
-        onClick={handleCopyInstall}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") handleCopyInstall();
-        }}
-        className={cn(
-          "flex-1",
-          skill.isPublished && "cursor-pointer"
-        )}
-      >
+    <Card
+      role={skill.isPublished ? "button" : undefined}
+      tabIndex={skill.isPublished ? 0 : undefined}
+      onClick={handleCopyInstall}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") handleCopyInstall();
+      }}
+      className={cn(
+        "relative flex flex-col transition-shadow",
+        skill.isPublished && "group cursor-pointer hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/30"
+      )}
+    >
+      <div className="flex-1">
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
           <div>
             <CardTitle className="text-base">{skill.name}</CardTitle>
@@ -87,7 +83,7 @@ export function SkillCard({
           {skill.isPublished && (
             <div className={cn(
               "mt-2 flex items-center gap-1.5 text-xs transition-opacity",
-              copied ? "text-green-600 opacity-100" : "text-muted-foreground opacity-0 group-hover:opacity-100"
+              copied ? "text-green-600 opacity-100" : "text-yellow-500 opacity-0 group-hover:opacity-100"
             )}>
               {copied ? (
                 <>
@@ -105,12 +101,12 @@ export function SkillCard({
         </CardContent>
       </div>
 
-      {/* Bottom action bar - not part of the copy click area */}
+      {/* Bottom action bar - buttons stop propagation to avoid triggering copy */}
       <div className="flex items-center justify-between border-t px-4 py-2">
         <span className="text-xs text-muted-foreground">
           {new Date(skill.createdAt).toLocaleDateString()}
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
           {onDuplicate && (
             <Button
               variant="ghost"
