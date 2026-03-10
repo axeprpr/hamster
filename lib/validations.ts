@@ -61,3 +61,17 @@ export const tokenSchema = z.object({
 export const installSchema = z.object({
   machineCode: z.string().min(1, "Machine code is required"),
 });
+
+export const bundleSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().optional(),
+  skillIds: z.array(z.string()).default([]),
+  isPublished: z.boolean().optional(),
+});
+
+export const bundleUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  skillIds: z.array(z.string()).optional(),
+  isPublished: z.boolean().optional(),
+});

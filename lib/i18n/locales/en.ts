@@ -168,6 +168,8 @@ const en = {
   "skills.credentialsLinked": "{count} credential(s) linked",
   "skills.copyInstall": "Copy Install Prompt",
   "skills.copied": "Copied!",
+  "skills.duplicate": "Duplicate Skill",
+  "skills.duplicated": "Skill duplicated!",
   "skills.form.name": "Skill Name",
   "skills.form.namePlaceholder": "e.g. Send Email via Gmail",
   "skills.form.slug": "Slug",
@@ -186,6 +188,21 @@ const en = {
   "skills.form.preset": "Preset Template",
   "skills.form.selectPreset": "Select a preset...",
   "skills.form.customTemplate": "Custom Template",
+
+  // Bundles
+  "bundles.title": "Bundles",
+  "bundles.create": "New Bundle",
+  "bundles.edit": "Edit Bundle",
+  "bundles.selectSkills": "Select Skills",
+  "bundles.copied": "Copied!",
+  "bundles.copyInstall": "Copy Install Prompt",
+  "bundles.skillCount": "{count} skill(s) included",
+  "bundles.noBundles": "No bundles yet",
+  "bundles.noBundlesDescription": "Create a bundle to combine multiple skills into a single installation.",
+  "bundles.deleteTitle": "Delete bundle",
+  "bundles.deleteDescription": "This action cannot be undone. The bundle API endpoint will stop working.",
+  "bundles.namePlaceholder": "e.g. My AI Stack",
+  "bundles.descriptionPlaceholder": "Brief description of this bundle",
 
   // Machines
   "machines.title": "Machines",

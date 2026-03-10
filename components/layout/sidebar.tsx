@@ -12,15 +12,13 @@ import {
   Monitor,
   ScrollText,
   Settings,
-  LayoutDashboard,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems: { href: string; labelKey: LocaleKeys; icon: typeof Key }[] = [
-  { href: "/dashboard", labelKey: "nav.overview", icon: LayoutDashboard },
-  { href: "/dashboard/credentials", labelKey: "nav.credentials", icon: Key },
   { href: "/dashboard/skills", labelKey: "nav.skills", icon: Zap },
+  { href: "/dashboard/credentials", labelKey: "nav.credentials", icon: Key },
   { href: "/dashboard/machines", labelKey: "nav.machines", icon: Monitor },
   { href: "/dashboard/logs", labelKey: "nav.logs", icon: ScrollText },
   { href: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
@@ -51,7 +49,7 @@ export function Sidebar({
         )}
       >
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard/skills" className="flex items-center gap-2">
             <Shield className="size-5 text-primary" />
             <span className="text-lg font-semibold">{t("brand.name")}</span>
           </Link>
@@ -67,8 +65,7 @@ export function Sidebar({
         <nav className="flex-1 space-y-1 p-3">
           {navItems.map((item) => {
             const isActive =
-              pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}

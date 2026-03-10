@@ -1,39 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Pencil, Trash2, Copy, Check, CopyPlus } from "lucide-react";
+import { Copy, Check, Trash2, Pencil, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/i18n/context";
 
-interface Skill {
+interface Bundle {
   id: string;
-  slug: string;
   name: string;
   description?: string | null;
+  skillIds: string[];
   isPublished: boolean;
-  credentialIds?: string[];
   createdAt: string;
 }
 
-export function SkillCard({
-  skill,
+export function BundleCard({
+  bundle,
+  onEdit,
   onDelete,
-  onDuplicate,
 }: {
-  skill: Skill;
-  onDelete: (slug: string) => void;
-  onDuplicate?: (skill: Skill) => void;
+  bundle: Bundle;
+  onEdit: (bundle: Bundle) => void;
+  onDelete: (id: string) => void;
 }) {
   const { t } = useLocale();
-  const credCount = skill.credentialIds?.length || 0;
   const [copied, setCopied] = useState(false);
 
   function handleCopyInstall() {
     const domain = typeof window !== "undefined" ? window.location.origin : "";
-    const prompt = `请参考 ${domain}/api/s/${skill.id}/install-doc 帮我安装和配置 ${skill.name}。`;
+    const prompt = `请参考 ${domain}/api/sb/${bundle.id}/install-doc 帮我安装和配置 ${bundle.name} 中的所有服务。`;
     navigator.clipboard.writeText(prompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -42,25 +39,25 @@ export function SkillCard({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <div>
-          <CardTitle className="text-base">{skill.name}</CardTitle>
-          <code className="text-xs text-muted-foreground">{skill.slug}</code>
+        <div className="flex items-center gap-2">
+          <Package className="size-4 text-muted-foreground" />
+          <CardTitle className="text-base">{bundle.name}</CardTitle>
         </div>
-        <Badge variant={skill.isPublished ? "default" : "secondary"}>
-          {skill.isPublished ? t("common.published") : t("common.draft")}
+        <Badge variant={bundle.isPublished ? "default" : "secondary"}>
+          {bundle.isPublished ? t("common.published") : t("common.draft")}
         </Badge>
       </CardHeader>
       <CardContent>
-        {skill.description && (
+        {bundle.description && (
           <p className="mb-3 text-sm text-muted-foreground">
-            {skill.description}
+            {bundle.description}
           </p>
         )}
         <div className="mb-3 text-xs text-muted-foreground">
-          {t("skills.credentialsLinked", { count: credCount })}
+          {t("bundles.skillCount", { count: bundle.skillIds?.length || 0 })}
         </div>
 
-        {skill.isPublished && (
+        {bundle.isPublished && (
           <Button
             variant="outline"
             size="sm"
@@ -70,12 +67,12 @@ export function SkillCard({
             {copied ? (
               <>
                 <Check className="size-3" />
-                {t("skills.copied")}
+                {t("bundles.copied")}
               </>
             ) : (
               <>
                 <Copy className="size-3" />
-                {t("skills.copyInstall")}
+                {t("bundles.copyInstall")}
               </>
             )}
           </Button>
@@ -83,26 +80,20 @@ export function SkillCard({
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {new Date(skill.createdAt).toLocaleDateString()}
+            {new Date(bundle.createdAt).toLocaleDateString()}
           </span>
           <div className="flex gap-1">
-            {onDuplicate && (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                onClick={() => onDuplicate(skill)}
-                title={t("skills.duplicate")}
-              >
-                <CopyPlus className="size-3" />
-              </Button>
-            )}
-            <Button variant="ghost" size="icon-xs" render={<Link href={`/dashboard/skills/${skill.slug}`} />}>
-                <Pencil className="size-3" />
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => onEdit(bundle)}
+            >
+              <Pencil className="size-3" />
             </Button>
             <Button
               variant="ghost"
               size="icon-xs"
-              onClick={() => onDelete(skill.slug)}
+              onClick={() => onDelete(bundle.id)}
             >
               <Trash2 className="size-3 text-destructive" />
             </Button>

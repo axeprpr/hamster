@@ -170,6 +170,8 @@ const zh: Record<LocaleKeys, string> = {
   "skills.credentialsLinked": "{count} 个凭据已关联",
   "skills.copyInstall": "复制安装提示词",
   "skills.copied": "已复制！",
+  "skills.duplicate": "复制技能",
+  "skills.duplicated": "技能已复制！",
   "skills.form.name": "技能名称",
   "skills.form.namePlaceholder": "例如 通过 Gmail 发送邮件",
   "skills.form.slug": "标识符",
@@ -188,6 +190,21 @@ const zh: Record<LocaleKeys, string> = {
   "skills.form.preset": "预设模板",
   "skills.form.selectPreset": "选择预设...",
   "skills.form.customTemplate": "自定义模板",
+
+  // Bundles
+  "bundles.title": "捆绑包",
+  "bundles.create": "新建捆绑包",
+  "bundles.edit": "编辑捆绑包",
+  "bundles.selectSkills": "选择技能",
+  "bundles.copied": "已复制！",
+  "bundles.copyInstall": "复制安装提示词",
+  "bundles.skillCount": "包含 {count} 个技能",
+  "bundles.noBundles": "暂无捆绑包",
+  "bundles.noBundlesDescription": "创建捆绑包将多个技能合并为一次安装。",
+  "bundles.deleteTitle": "删除捆绑包",
+  "bundles.deleteDescription": "此操作不可撤销。捆绑包的 API 端点将停止工作。",
+  "bundles.namePlaceholder": "例如 我的 AI 套件",
+  "bundles.descriptionPlaceholder": "简要描述此捆绑包",
 
   // Machines
   "machines.title": "机器",

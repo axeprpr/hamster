@@ -87,3 +87,16 @@ export const accessLogs = pgTable("access_logs", {
   details: text("details"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const skillBundles = pgTable("skill_bundles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  skillIds: jsonb("skill_ids").$type<string[]>().default([]),
+  isPublished: boolean("is_published").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

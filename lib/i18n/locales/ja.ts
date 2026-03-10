@@ -170,6 +170,8 @@ const ja: Record<LocaleKeys, string> = {
   "skills.credentialsLinked": "{count}個の認証情報がリンク済み",
   "skills.copyInstall": "インストールプロンプトをコピー",
   "skills.copied": "コピーしました！",
+  "skills.duplicate": "スキルを複製",
+  "skills.duplicated": "スキルを複製しました！",
   "skills.form.name": "スキル名",
   "skills.form.namePlaceholder": "例: Gmailでメール送信",
   "skills.form.slug": "スラッグ",
@@ -188,6 +190,21 @@ const ja: Record<LocaleKeys, string> = {
   "skills.form.preset": "プリセットテンプレート",
   "skills.form.selectPreset": "プリセットを選択...",
   "skills.form.customTemplate": "カスタムテンプレート",
+
+  // Bundles
+  "bundles.title": "バンドル",
+  "bundles.create": "新規バンドル",
+  "bundles.edit": "バンドルを編集",
+  "bundles.selectSkills": "スキルを選択",
+  "bundles.copied": "コピーしました！",
+  "bundles.copyInstall": "インストールプロンプトをコピー",
+  "bundles.skillCount": "{count}個のスキルを含む",
+  "bundles.noBundles": "バンドルがありません",
+  "bundles.noBundlesDescription": "バンドルを作成して複数のスキルを1回のインストールにまとめましょう。",
+  "bundles.deleteTitle": "バンドルを削除",
+  "bundles.deleteDescription": "この操作は元に戻せません。バンドルのAPIエンドポイントは停止します。",
+  "bundles.namePlaceholder": "例: 私のAIスタック",
+  "bundles.descriptionPlaceholder": "このバンドルの簡単な説明",
 
   // Machines
   "machines.title": "マシン",

@@ -170,6 +170,8 @@ const ko: Record<LocaleKeys, string> = {
   "skills.credentialsLinked": "자격 증명 {count}개 연결됨",
   "skills.copyInstall": "설치 프롬프트 복사",
   "skills.copied": "복사됨!",
+  "skills.duplicate": "스킬 복제",
+  "skills.duplicated": "스킬이 복제되었습니다!",
   "skills.form.name": "스킬 이름",
   "skills.form.namePlaceholder": "예: Gmail로 이메일 보내기",
   "skills.form.slug": "슬러그",
@@ -188,6 +190,21 @@ const ko: Record<LocaleKeys, string> = {
   "skills.form.preset": "프리셋 템플릿",
   "skills.form.selectPreset": "프리셋 선택...",
   "skills.form.customTemplate": "커스텀 템플릿",
+
+  // Bundles
+  "bundles.title": "번들",
+  "bundles.create": "새 번들",
+  "bundles.edit": "번들 편집",
+  "bundles.selectSkills": "스킬 선택",
+  "bundles.copied": "복사됨!",
+  "bundles.copyInstall": "설치 프롬프트 복사",
+  "bundles.skillCount": "스킬 {count}개 포함",
+  "bundles.noBundles": "번들이 없습니다",
+  "bundles.noBundlesDescription": "번들을 만들어 여러 스킬을 하나의 설치로 통합하세요.",
+  "bundles.deleteTitle": "번들 삭제",
+  "bundles.deleteDescription": "이 작업은 취소할 수 없습니다. 번들 API 엔드포인트가 중지됩니다.",
+  "bundles.namePlaceholder": "예: 내 AI 스택",
+  "bundles.descriptionPlaceholder": "이 번들에 대한 간단한 설명",
 
   // Machines
   "machines.title": "머신",
