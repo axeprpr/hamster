@@ -44,7 +44,10 @@ export function SkillCard({
   }
 
   return (
-    <Card className="relative flex flex-col">
+    <Card className={cn(
+      "relative flex flex-col transition-shadow",
+      skill.isPublished && "group hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/30"
+    )}>
       {/* Clickable area for copy - everything except the bottom action bar */}
       <div
         role={skill.isPublished ? "button" : undefined}
@@ -55,8 +58,7 @@ export function SkillCard({
         }}
         className={cn(
           "flex-1",
-          skill.isPublished && "cursor-pointer rounded-t-xl transition-colors hover:bg-muted/50",
-          skill.isPublished && "group"
+          skill.isPublished && "cursor-pointer"
         )}
       >
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
