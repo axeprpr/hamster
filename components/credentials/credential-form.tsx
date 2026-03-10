@@ -2,15 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { ArrowLeft, ArrowRight, CheckCircle2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { CategoryIcon, CREDENTIAL_CATEGORIES } from "./category-icon";
 import { useLocale } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
+
+const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-64 items-center justify-center rounded-lg border bg-muted text-sm text-muted-foreground">
+      Loading editor...
+    </div>
+  ),
+});
 
 const CATEGORY_PLACEHOLDERS: Record<string, string> = {
   email: `# SMTP Configuration
@@ -95,7 +104,7 @@ export function CredentialForm({ initialData }: CredentialFormProps) {
     const body = {
       name,
       category,
-      value: rawValue,
+      value: rawValue || CATEGORY_PLACEHOLDERS[category] || CATEGORY_PLACEHOLDERS.other,
       description: description || undefined,
     };
 
@@ -237,15 +246,23 @@ export function CredentialForm({ initialData }: CredentialFormProps) {
               <p className="text-xs text-muted-foreground">
                 {t("credentials.form.markdownHelp")}
               </p>
-              <Textarea
-                id="value"
-                placeholder={CATEGORY_PLACEHOLDERS[category] || CATEGORY_PLACEHOLDERS.other}
-                value={rawValue}
-                onChange={(e) => setRawValue(e.target.value)}
-                required
-                rows={10}
-                className="font-mono text-sm"
-              />
+              <div className="overflow-hidden rounded-lg border">
+                <MonacoEditor
+                  height="300px"
+                  defaultLanguage="markdown"
+                  value={rawValue || (CATEGORY_PLACEHOLDERS[category] || CATEGORY_PLACEHOLDERS.other)}
+                  onChange={(value) => setRawValue(value || "")}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: "on",
+                    wordWrap: "on",
+                    scrollBeyondLastLine: false,
+                    padding: { top: 12 },
+                  }}
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
                 {t("credentials.form.valueHelp")}
               </p>
