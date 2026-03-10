@@ -103,12 +103,12 @@ export function SkillCard({
       </div>
 
       {/* Bottom action bar - buttons stop propagation to avoid triggering copy */}
-      <div className="flex items-center justify-between border-t px-4 py-2">
+      <div className="flex items-center justify-between border-t px-4 py-1">
         <span className="text-xs text-muted-foreground">
           {new Date(skill.createdAt).toLocaleDateString()}
         </span>
         <div
-          className="group/actions flex gap-1"
+          className="flex gap-0.5"
           onClick={(e) => e.stopPropagation()}
           onMouseEnter={() => setHoveringActions(true)}
           onMouseLeave={() => setHoveringActions(false)}
@@ -116,29 +116,29 @@ export function SkillCard({
           {onDuplicate && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               className="rounded-md"
               onClick={() => onDuplicate(skill)}
               title={t("skills.duplicate")}
             >
-              <CopyPlus className="size-3.5" />
+              <CopyPlus className="size-4" />
             </Button>
           )}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             className="rounded-md"
             render={<Link href={`/dashboard/skills/${skill.slug}`} />}
           >
-            <Pencil className="size-3.5" />
+            <Pencil className="size-4" />
           </Button>
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             className="rounded-md"
             onClick={() => onDelete(skill.slug)}
           >
-            <Trash2 className="size-3.5 text-destructive" />
+            <Trash2 className="size-4 text-destructive" />
           </Button>
         </div>
       </div>
