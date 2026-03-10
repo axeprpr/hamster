@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { skills } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 export async function GET(
   request: Request,
@@ -16,6 +16,8 @@ export async function GET(
         name: skills.name,
         description: skills.description,
         isPublished: skills.isPublished,
+        linkedSkillIds: skills.linkedSkillIds,
+        userId: skills.userId,
       })
       .from(skills)
       .where(and(eq(skills.id, id), eq(skills.isPublished, true)))
@@ -28,13 +30,32 @@ export async function GET(
       });
     }
 
+    // Fetch linked skills info
+    const linkedIds = (skill.linkedSkillIds as string[]) || [];
+    let linkedSkillsList = "";
+    if (linkedIds.length > 0) {
+      const linked = await db
+        .select({ name: skills.name, description: skills.description })
+        .from(skills)
+        .where(
+          and(
+            inArray(skills.id, linkedIds),
+            eq(skills.userId, skill.userId)
+          )
+        );
+
+      if (linked.length > 0) {
+        linkedSkillsList = `\n## Included Skills\n\n${linked.map((s, i) => `${i + 1}. **${s.name}**${s.description ? ` — ${s.description}` : ""}`).join("\n")}\n`;
+      }
+    }
+
     // Build the origin from the request URL
     const url = new URL(request.url);
     const origin = url.origin;
 
     const installDoc = `# ${skill.name} — Installation Guide
 
-${skill.description ? `> ${skill.description}\n` : ""}
+${skill.description ? `> ${skill.description}\n` : ""}${linkedSkillsList}
 ## Step 1: Get Machine Code
 
 First, detect the user's operating system and run the appropriate command to get the machine code:

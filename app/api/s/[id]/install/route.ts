@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { skills, credentials, machines, accessLogs } from "@/lib/db/schema";
 import { installSchema } from "@/lib/validations";
 import { decrypt, hashMachineCode } from "@/lib/crypto";
-import { eq, and, gt, sql } from "drizzle-orm";
+import { eq, and, gt, sql, inArray } from "drizzle-orm";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const RATE_LIMIT_MAX_FAILURES = 10;
@@ -63,7 +63,6 @@ export async function POST(
       .limit(1);
 
     if (!skill) {
-      // Unified error: don't reveal whether skill exists
       return NextResponse.json(
         { error: "Access denied" },
         { status: 403 }
@@ -111,37 +110,62 @@ export async function POST(
 
     if (!machine) {
       await logAccess(skill.userId, skill.id, null, ipAddress, "install", false, "Denied");
-      // Unified error: same message for skill-not-found and machine-not-found
       return NextResponse.json(
         { error: "Access denied" },
         { status: 403 }
       );
     }
 
-    // Decrypt credentials and render template
-    const credentialIds = (skill.credentialIds as string[]) || [];
-    const credentialMap: Record<string, string> = {};
+    // Collect all credential IDs (from main skill + linked skills)
+    const allCredentialIds = new Set<string>();
+    const mainCredIds = (skill.credentialIds as string[]) || [];
+    for (const cid of mainCredIds) allCredentialIds.add(cid);
 
-    if (credentialIds.length > 0) {
+    // Fetch linked skills
+    const linkedSkillIds = (skill.linkedSkillIds as string[]) || [];
+    let linkedSkills: (typeof skill)[] = [];
+    if (linkedSkillIds.length > 0) {
+      linkedSkills = await db
+        .select()
+        .from(skills)
+        .where(
+          and(
+            inArray(skills.id, linkedSkillIds),
+            eq(skills.userId, skill.userId)
+          )
+        );
+
+      // Collect credential IDs from linked skills
+      for (const ls of linkedSkills) {
+        const lsCredIds = (ls.credentialIds as string[]) || [];
+        for (const cid of lsCredIds) allCredentialIds.add(cid);
+      }
+    }
+
+    // Decrypt all needed credentials
+    const credentialMap: Record<string, string> = {};
+    if (allCredentialIds.size > 0) {
       const userCreds = await db
         .select()
         .from(credentials)
         .where(eq(credentials.userId, skill.userId));
 
       for (const cred of userCreds) {
-        if (credentialIds.includes(cred.id)) {
+        if (allCredentialIds.has(cred.id)) {
           const value = decrypt(cred.encryptedValue, cred.iv, cred.authTag);
           credentialMap[cred.name] = value;
         }
       }
     }
 
-    // Render template — use safe string replacement (no RegExp)
-    let rendered = skill.instructionTemplate;
-    for (const [name, value] of Object.entries(credentialMap)) {
-      const placeholder = `{{${name}}}`;
-      while (rendered.includes(placeholder)) {
-        rendered = rendered.replace(placeholder, value);
+    // Render main template
+    let rendered = renderTemplate(skill.instructionTemplate, credentialMap);
+
+    // Append linked skill templates
+    if (linkedSkills.length > 0) {
+      for (const ls of linkedSkills) {
+        const lsRendered = renderTemplate(ls.instructionTemplate, credentialMap);
+        rendered += `\n\n---\n\n${lsRendered}`;
       }
     }
 
@@ -163,6 +187,17 @@ export async function POST(
       { status: 500 }
     );
   }
+}
+
+function renderTemplate(template: string, credentialMap: Record<string, string>): string {
+  let rendered = template;
+  for (const [name, value] of Object.entries(credentialMap)) {
+    const placeholder = `{{${name}}}`;
+    while (rendered.includes(placeholder)) {
+      rendered = rendered.replace(placeholder, value);
+    }
+  }
+  return rendered;
 }
 
 async function logAccess(

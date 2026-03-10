@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CategoryIcon } from "./category-icon";
-import { getSubType } from "@/lib/credential-types";
 
 interface Credential {
   id: string;
@@ -24,9 +23,6 @@ export function CredentialCard({
   credential: Credential;
   onDelete: (id: string) => void;
 }) {
-  const subTypeValue = credential.metadata?.type;
-  const subType = subTypeValue ? getSubType(subTypeValue) : undefined;
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
@@ -35,7 +31,7 @@ export function CredentialCard({
           <CardTitle className="text-base">{credential.name}</CardTitle>
         </div>
         <Badge variant="secondary" className="text-xs">
-          {subType ? subType.label : credential.category}
+          {credential.category}
         </Badge>
       </CardHeader>
       <CardContent>
@@ -49,12 +45,13 @@ export function CredentialCard({
             {new Date(credential.createdAt).toLocaleDateString()}
           </span>
           <div className="flex gap-1">
-            <Button variant="ghost" size="icon-xs" render={<Link href={`/dashboard/credentials/${credential.id}`} />}>
+            <Button variant="ghost" size="icon-xs" className="rounded-md" render={<Link href={`/dashboard/credentials/${credential.id}`} />}>
                 <Pencil className="size-3" />
             </Button>
             <Button
               variant="ghost"
               size="icon-xs"
+              className="rounded-md"
               onClick={() => onDelete(credential.id)}
             >
               <Trash2 className="size-3 text-destructive" />

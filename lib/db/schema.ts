@@ -41,6 +41,7 @@ export const skills = pgTable("skills", {
   description: text("description"),
   instructionTemplate: text("instruction_template").notNull(),
   credentialIds: jsonb("credential_ids").$type<string[]>().default([]),
+  linkedSkillIds: jsonb("linked_skill_ids").$type<string[]>().default([]),
   isPublished: boolean("is_published").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

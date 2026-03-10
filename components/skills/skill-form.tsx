@@ -7,15 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CredentialPicker } from "./credential-picker";
-import { SKILL_PRESETS } from "@/lib/skill-presets";
+import { SkillPicker } from "./skill-picker";
 import { useLocale } from "@/lib/i18n/context";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
@@ -34,6 +27,7 @@ interface SkillFormProps {
     description?: string | null;
     instructionTemplate: string;
     credentialIds?: string[];
+    linkedSkillIds?: string[];
     isPublished: boolean;
   };
 }
@@ -49,6 +43,9 @@ export function SkillForm({ initialData }: SkillFormProps) {
   const [credentialIds, setCredentialIds] = useState<string[]>(
     initialData?.credentialIds || []
   );
+  const [linkedSkillIds, setLinkedSkillIds] = useState<string[]>(
+    initialData?.linkedSkillIds || []
+  );
   const [isPublished, setIsPublished] = useState(
     initialData?.isPublished || false
   );
@@ -56,19 +53,6 @@ export function SkillForm({ initialData }: SkillFormProps) {
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const isEdit = !!initialData;
-
-  function handlePresetSelect(presetId: string) {
-    if (presetId === "custom") return;
-    const preset = SKILL_PRESETS.find((p) => p.id === presetId);
-    if (preset) {
-      if (!isEdit) {
-        setName(preset.name);
-        setSlug(preset.slug);
-        setDescription(preset.description);
-      }
-      setTemplate(preset.template);
-    }
-  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,6 +65,7 @@ export function SkillForm({ initialData }: SkillFormProps) {
       description: description || undefined,
       instructionTemplate: template,
       credentialIds,
+      linkedSkillIds,
       isPublished,
     };
 
@@ -111,25 +96,6 @@ export function SkillForm({ initialData }: SkillFormProps) {
       {error && (
         <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
-        </div>
-      )}
-
-      {!isEdit && (
-        <div className="space-y-2">
-          <Label>{t("skills.form.preset")}</Label>
-          <Select onValueChange={(v: string | null) => { if (v) handlePresetSelect(v); }}>
-            <SelectTrigger>
-              <SelectValue placeholder={t("skills.form.selectPreset")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="custom">{t("skills.form.customTemplate")}</SelectItem>
-              {SKILL_PRESETS.map((preset) => (
-                <SelectItem key={preset.id} value={preset.id}>
-                  {preset.name} — {preset.description}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       )}
 
@@ -207,6 +173,18 @@ export function SkillForm({ initialData }: SkillFormProps) {
         <CredentialPicker
           selected={credentialIds}
           onChange={setCredentialIds}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>{t("skills.form.linkedSkills")}</Label>
+        <p className="text-xs text-muted-foreground">
+          {t("skills.form.linkedSkillsHelp")}
+        </p>
+        <SkillPicker
+          selected={linkedSkillIds}
+          onChange={setLinkedSkillIds}
+          excludeSlug={isEdit ? initialData.slug : undefined}
         />
       </div>
 
