@@ -131,9 +131,9 @@ const ja: Record<LocaleKeys, string> = {
   "credentials.form.descriptionPlaceholder": "認証情報の簡単な説明",
 
   // Credential categories
-  "category.email": "メール / SMTP",
-  "category.oss": "オブジェクトストレージ (OSS/S3)",
-  "category.im": "IM (DingTalk/Feishu/WeCom)",
+  "category.email": "Email",
+  "category.oss": "OSS",
+  "category.im": "IM",
   "category.api": "APIキー",
   "category.database": "データベース",
   "category.other": "その他",

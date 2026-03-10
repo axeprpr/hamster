@@ -18,9 +18,9 @@ const categoryConfig: Record<string, { icon: LucideIcon; color: string }> = {
 };
 
 export const CREDENTIAL_CATEGORIES = [
-  { value: "email", label: "Email / SMTP" },
-  { value: "oss", label: "Object Storage (OSS/S3)" },
-  { value: "im", label: "IM (DingTalk/Feishu/WeCom)" },
+  { value: "email", label: "Email" },
+  { value: "oss", label: "OSS" },
+  { value: "im", label: "IM" },
   { value: "api", label: "API Keys" },
   { value: "database", label: "Database" },
   { value: "other", label: "Other" },

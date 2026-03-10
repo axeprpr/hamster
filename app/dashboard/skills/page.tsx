@@ -90,17 +90,15 @@ export default function SkillsPage() {
       <PageHeader
         title={t("skills.title")}
         description={t("skills.description")}
-      />
-
-      <div className="space-y-4">
-        <div className="flex justify-end">
+        action={
           <Button render={<Link href="/dashboard/skills/new" />}>
             <Plus className="size-4" />
             {t("skills.new")}
           </Button>
-        </div>
+        }
+      />
 
-        {skills.length === 0 ? (
+      {skills.length === 0 ? (
           <EmptyState
             icon={Zap}
             title={t("skills.noSkills")}
@@ -123,8 +121,7 @@ export default function SkillsPage() {
               />
             ))}
           </div>
-        )}
-      </div>
+      )}
 
       <ConfirmDialog
         open={!!deleteSlug}

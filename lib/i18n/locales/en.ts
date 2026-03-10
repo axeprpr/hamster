@@ -129,9 +129,9 @@ const en = {
   "credentials.form.descriptionPlaceholder": "Brief description of this credential",
 
   // Credential categories
-  "category.email": "Email / SMTP",
-  "category.oss": "Object Storage (OSS/S3)",
-  "category.im": "IM (DingTalk/Feishu/WeCom)",
+  "category.email": "Email",
+  "category.oss": "OSS",
+  "category.im": "IM",
   "category.api": "API Keys",
   "category.database": "Database",
   "category.other": "Other",

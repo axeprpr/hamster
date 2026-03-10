@@ -131,9 +131,9 @@ const ko: Record<LocaleKeys, string> = {
   "credentials.form.descriptionPlaceholder": "자격 증명에 대한 간단한 설명",
 
   // Credential categories
-  "category.email": "이메일 / SMTP",
-  "category.oss": "오브젝트 스토리지 (OSS/S3)",
-  "category.im": "IM (DingTalk/Feishu/WeCom)",
+  "category.email": "Email",
+  "category.oss": "OSS",
+  "category.im": "IM",
   "category.api": "API 키",
   "category.database": "데이터베이스",
   "category.other": "기타",

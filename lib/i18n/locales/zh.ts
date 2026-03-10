@@ -131,9 +131,9 @@ const zh: Record<LocaleKeys, string> = {
   "credentials.form.descriptionPlaceholder": "凭据的简要描述",
 
   // Credential categories
-  "category.email": "邮箱 / SMTP",
-  "category.oss": "对象存储 (OSS/S3)",
-  "category.im": "即时通讯 (钉钉/飞书/企微)",
+  "category.email": "Email",
+  "category.oss": "OSS",
+  "category.im": "IM",
   "category.api": "API 密钥",
   "category.database": "数据库",
   "category.other": "其他",
