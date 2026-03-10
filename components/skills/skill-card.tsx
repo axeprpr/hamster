@@ -53,7 +53,7 @@ export function SkillCard({
         if (e.key === "Enter" || e.key === " ") handleCopyInstall();
       }}
       className={cn(
-        "relative flex flex-col transition-shadow",
+        "relative flex flex-col !pb-0 transition-shadow",
         skill.isPublished && "group cursor-pointer hover:shadow-lg hover:shadow-black/10 dark:hover:shadow-black/30"
       )}
     >
