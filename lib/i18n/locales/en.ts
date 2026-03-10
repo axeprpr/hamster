@@ -151,7 +151,7 @@ const en = {
   "skills.failedToSave": "Failed to save skill",
   "skills.credentialsLinked": "{count} credential(s) linked",
   "skills.linkedSkillsCount": "{count} skill(s) linked",
-  "skills.clickToCopy": "Click to copy install prompt",
+  "skills.clickToCopy": "Click to copy install prompt for this skill",
   "skills.copyInstall": "Copy Install Prompt",
   "skills.copied": "Copied!",
   "skills.duplicate": "Duplicate Skill",

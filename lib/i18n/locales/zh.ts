@@ -153,7 +153,7 @@ const zh: Record<LocaleKeys, string> = {
   "skills.failedToSave": "保存技能失败",
   "skills.credentialsLinked": "{count} 个凭据已关联",
   "skills.linkedSkillsCount": "{count} 个技能已关联",
-  "skills.clickToCopy": "点击复制安装提示词",
+  "skills.clickToCopy": "点击复制该技能的安装提示词",
   "skills.copyInstall": "复制安装提示词",
   "skills.copied": "已复制！",
   "skills.duplicate": "复制技能",

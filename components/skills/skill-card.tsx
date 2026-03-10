@@ -33,6 +33,7 @@ export function SkillCard({
   const credCount = skill.credentialIds?.length || 0;
   const linkedCount = skill.linkedSkillIds?.length || 0;
   const [copied, setCopied] = useState(false);
+  const [hoveringActions, setHoveringActions] = useState(false);
 
   function handleCopyInstall() {
     if (!skill.isPublished) return;
@@ -83,7 +84,7 @@ export function SkillCard({
           {skill.isPublished && (
             <div className={cn(
               "mt-2 flex items-center gap-1.5 text-xs transition-opacity",
-              copied ? "text-green-600 opacity-100" : "text-yellow-500 opacity-0 group-hover:opacity-100"
+              copied ? "text-green-600 opacity-100" : cn("text-yellow-500 opacity-0 group-hover:opacity-100", hoveringActions && "!opacity-0")
             )}>
               {copied ? (
                 <>
@@ -106,33 +107,38 @@ export function SkillCard({
         <span className="text-xs text-muted-foreground">
           {new Date(skill.createdAt).toLocaleDateString()}
         </span>
-        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="group/actions flex gap-1"
+          onClick={(e) => e.stopPropagation()}
+          onMouseEnter={() => setHoveringActions(true)}
+          onMouseLeave={() => setHoveringActions(false)}
+        >
           {onDuplicate && (
             <Button
               variant="ghost"
-              size="icon-xs"
+              size="icon-sm"
               className="rounded-md"
               onClick={() => onDuplicate(skill)}
               title={t("skills.duplicate")}
             >
-              <CopyPlus className="size-3" />
+              <CopyPlus className="size-3.5" />
             </Button>
           )}
           <Button
             variant="ghost"
-            size="icon-xs"
+            size="icon-sm"
             className="rounded-md"
             render={<Link href={`/dashboard/skills/${skill.slug}`} />}
           >
-            <Pencil className="size-3" />
+            <Pencil className="size-3.5" />
           </Button>
           <Button
             variant="ghost"
-            size="icon-xs"
+            size="icon-sm"
             className="rounded-md"
             onClick={() => onDelete(skill.slug)}
           >
-            <Trash2 className="size-3 text-destructive" />
+            <Trash2 className="size-3.5 text-destructive" />
           </Button>
         </div>
       </div>

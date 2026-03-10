@@ -153,7 +153,7 @@ const ja: Record<LocaleKeys, string> = {
   "skills.failedToSave": "スキルの保存に失敗しました",
   "skills.credentialsLinked": "{count}個の認証情報がリンク済み",
   "skills.linkedSkillsCount": "{count}個のスキルがリンク済み",
-  "skills.clickToCopy": "クリックしてインストールプロンプトをコピー",
+  "skills.clickToCopy": "クリックしてこのスキルのインストールプロンプトをコピー",
   "skills.copyInstall": "インストールプロンプトをコピー",
   "skills.copied": "コピーしました！",
   "skills.duplicate": "スキルを複製",

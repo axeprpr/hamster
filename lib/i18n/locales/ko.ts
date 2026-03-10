@@ -153,7 +153,7 @@ const ko: Record<LocaleKeys, string> = {
   "skills.failedToSave": "스킬 저장 실패",
   "skills.credentialsLinked": "자격 증명 {count}개 연결됨",
   "skills.linkedSkillsCount": "스킬 {count}개 연결됨",
-  "skills.clickToCopy": "클릭하여 설치 프롬프트 복사",
+  "skills.clickToCopy": "클릭하여 이 스킬의 설치 프롬프트 복사",
   "skills.copyInstall": "설치 프롬프트 복사",
   "skills.copied": "복사됨!",
   "skills.duplicate": "스킬 복제",
