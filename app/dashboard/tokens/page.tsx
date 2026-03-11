@@ -1,22 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Coins, AlertTriangle } from "lucide-react";
+import { KeyRound, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
 import { CopyButton } from "@/components/shared/copy-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useLocale } from "@/lib/i18n/context";
@@ -24,7 +13,6 @@ import { useLocale } from "@/lib/i18n/context";
 interface Token {
   id: string;
   name?: string | null;
-  machineId?: string | null;
   expiresAt?: string | null;
   isRevoked: boolean;
   createdAt: string;
@@ -32,70 +20,67 @@ interface Token {
 
 export default function TokensPage() {
   const { t } = useLocale();
-  const [tokens, setTokens] = useState<Token[]>([]);
+  const [token, setToken] = useState<Token | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [creating, setCreating] = useState(false);
-  const [newToken, setNewToken] = useState<string | null>(null);
-  const [revokeId, setRevokeId] = useState<string | null>(null);
-  const [revoking, setRevoking] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [newTokenValue, setNewTokenValue] = useState<string | null>(null);
+  const [showRegenerate, setShowRegenerate] = useState(false);
 
   useEffect(() => {
     fetch("/api/tokens")
       .then((r) => r.json())
-      .then(setTokens)
+      .then((tokens: Token[]) => {
+        const active = tokens.find(
+          (tk) =>
+            !tk.isRevoked &&
+            (!tk.expiresAt || new Date(tk.expiresAt) > new Date())
+        );
+        setToken(active ?? null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setCreating(true);
-    const formData = new FormData(e.currentTarget);
-
+  async function generateToken() {
+    setGenerating(true);
     const res = await fetch("/api/tokens", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: formData.get("name") || undefined,
-        expiresInDays: Number(formData.get("expiresInDays")) || undefined,
-      }),
+      body: JSON.stringify({ name: "API Token" }),
     });
 
     if (res.ok) {
       const data = await res.json();
-      setNewToken(data.token);
-      setTokens((prev) => [
-        ...prev,
-        {
-          id: data.id,
-          name: data.name,
-          expiresAt: data.expiresAt,
-          isRevoked: false,
-          createdAt: data.createdAt,
-        },
-      ]);
-      setShowCreate(false);
+      setNewTokenValue(data.token);
+      setToken({
+        id: data.id,
+        name: data.name,
+        expiresAt: data.expiresAt,
+        isRevoked: false,
+        createdAt: data.createdAt,
+      });
     }
-    setCreating(false);
+    setGenerating(false);
   }
 
-  async function handleRevoke() {
-    if (!revokeId) return;
-    setRevoking(true);
-    await fetch(`/api/tokens/${revokeId}`, { method: "DELETE" });
-    setTokens((prev) =>
-      prev.map((tk) =>
-        tk.id === revokeId ? { ...tk, isRevoked: true } : tk
-      )
-    );
-    setRevokeId(null);
-    setRevoking(false);
+  async function handleRegenerate() {
+    if (token) {
+      await fetch(`/api/tokens/${token.id}`, { method: "DELETE" });
+    }
+    setShowRegenerate(false);
+    await generateToken();
   }
 
-  function getStatus(token: Token) {
-    if (token.isRevoked) return { label: t("tokens.status.revoked"), variant: "destructive" as const };
-    if (token.expiresAt && new Date(token.expiresAt) < new Date())
-      return { label: t("tokens.status.expired"), variant: "secondary" as const };
+  function getStatus(tk: Token) {
+    if (tk.isRevoked)
+      return {
+        label: t("tokens.status.revoked"),
+        variant: "destructive" as const,
+      };
+    if (tk.expiresAt && new Date(tk.expiresAt) < new Date())
+      return {
+        label: t("tokens.status.expired"),
+        variant: "secondary" as const,
+      };
     return { label: t("tokens.status.active"), variant: "default" as const };
   }
 
@@ -115,15 +100,9 @@ export default function TokensPage() {
       <PageHeader
         title={t("tokens.title")}
         description={t("tokens.description")}
-        action={
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="size-4" />
-            {t("tokens.generate")}
-          </Button>
-        }
       />
 
-      {newToken && (
+      {newTokenValue && (
         <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-900 dark:bg-orange-950/30">
           <div className="flex items-center gap-2 text-sm font-medium text-orange-800 dark:text-orange-200">
             <AlertTriangle className="size-4" />
@@ -131,123 +110,73 @@ export default function TokensPage() {
           </div>
           <div className="mt-2 flex items-center gap-2">
             <code className="flex-1 break-all rounded bg-white px-3 py-2 text-sm font-mono dark:bg-black">
-              {newToken}
+              {newTokenValue}
             </code>
-            <CopyButton value={newToken} />
+            <CopyButton value={newTokenValue} />
           </div>
           <Button
             variant="ghost"
             size="sm"
             className="mt-2"
-            onClick={() => setNewToken(null)}
+            onClick={() => setNewTokenValue(null)}
           >
             {t("common.dismiss")}
           </Button>
         </div>
       )}
 
-      {tokens.length === 0 ? (
-        <EmptyState
-          icon={Coins}
-          title={t("tokens.noTokens")}
-          description={t("tokens.noTokensDescription")}
-          action={
-            <Button onClick={() => setShowCreate(true)}>
-              <Plus className="size-4" />
-              {t("tokens.generate")}
+      {!token ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <KeyRound className="size-10 text-muted-foreground mb-4" />
+            <p className="text-sm text-muted-foreground mb-4">
+              {t("tokens.noTokensDescription")}
+            </p>
+            <Button onClick={generateToken} disabled={generating}>
+              {generating ? t("tokens.generating") : t("tokens.generate")}
             </Button>
-          }
-        />
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tokens.map((token) => {
-            const status = getStatus(token);
-            return (
-              <Card key={token.id}>
-                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-                  <CardTitle className="text-base">
-                    {token.name || t("tokens.unnamed")}
-                  </CardTitle>
-                  <Badge variant={status.variant}>{status.label}</Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-xs text-muted-foreground">
-                    <div>
-                      {t("common.created", { date: new Date(token.createdAt).toLocaleDateString() })}
-                    </div>
-                    {token.expiresAt && (
-                      <div>
-                        {t("common.expires", { date: new Date(token.expiresAt).toLocaleDateString() })}
-                      </div>
-                    )}
-                  </div>
-                  {!token.isRevoked && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2 text-destructive"
-                      onClick={() => setRevokeId(token.id)}
-                    >
-                      {t("common.revoke")}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">
+                    {t("tokens.apiToken")}
+                  </span>
+                  <Badge variant={getStatus(token).variant}>
+                    {getStatus(token).label}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t("common.created", {
+                    date: new Date(token.createdAt).toLocaleDateString(),
+                  })}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowRegenerate(true)}
+                disabled={generating}
+              >
+                <RefreshCw className="size-4" />
+                {t("tokens.regenerate")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("tokens.generateTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("tokens.generateDescription")}
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreate} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="tokenName">{t("tokens.form.name")}</Label>
-              <Input
-                id="tokenName"
-                name="name"
-                placeholder={t("tokens.form.namePlaceholder")}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="expiresInDays">{t("tokens.form.expires")}</Label>
-              <Input
-                id="expiresInDays"
-                name="expiresInDays"
-                type="number"
-                placeholder="30"
-                min={1}
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowCreate(false)}
-              >
-                {t("common.cancel")}
-              </Button>
-              <Button type="submit" disabled={creating}>
-                {creating ? t("tokens.generating") : t("common.generate")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
       <ConfirmDialog
-        open={!!revokeId}
-        onOpenChange={(open) => !open && setRevokeId(null)}
-        title={t("tokens.revokeTitle")}
-        description={t("tokens.revokeDescription")}
-        onConfirm={handleRevoke}
-        loading={revoking}
+        open={showRegenerate}
+        onOpenChange={setShowRegenerate}
+        title={t("tokens.regenerateTitle")}
+        description={t("tokens.regenerateDescription")}
+        onConfirm={handleRegenerate}
+        loading={generating}
         destructive
       />
     </div>
